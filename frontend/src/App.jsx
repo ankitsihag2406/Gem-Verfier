@@ -6,6 +6,7 @@ import NewTenderPage from "./pages/NewTenderPage";
 import BidAnalysisPage from "./pages/BidAnalysisPage";
 import ActivityPage from "./pages/ActivityPage";
 import SettingsPage from "./pages/SettingsPage";
+import ReviewQueuePage from "./pages/ReviewQueuePage";
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
         <Route path="/tenders/new" element={<NewTenderPage />} />
         <Route path="/tenders/:id" element={<TenderDetailPage />} />
         <Route path="/bids/:id"    element={<BidAnalysisPage />} />
+        <Route path="/review"      element={<ReviewQueuePage />} />
         <Route path="/activity"    element={<ActivityPage />} />
         <Route path="/settings"    element={<SettingsPage />} />
       </Routes>

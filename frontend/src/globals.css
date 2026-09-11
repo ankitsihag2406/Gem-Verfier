@@ -1,52 +1,55 @@
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;600;700&display=swap');
 
-/* ─── GeM / Govt of India Design System ─────────────────────────────────── */
+/* ─── GeM / Govt of India Design System (myAadhaar Aesthetic) ────────────── */
 :root {
-  /* Primary Brand — GeM Navy Blue */
-  --gem-navy:       #003366;
-  --gem-navy-dark:  #002244;
-  --gem-navy-light: #004080;
+  /* Primary Brand — Dark Indigo/Purple */
+  --gem-navy:       #2A2359;
+  --gem-navy-dark:  #1A153A;
+  --gem-navy-light: #443B82;
 
-  /* Accent — GeM Orange (Govt of India saffron) */
+  /* Accent — Warm Peach/Orange */
   --gem-orange:     #E8691A;
-  --gem-orange-light: #F5813A;
+  --gem-orange-light: #F78E4C;
 
   /* Secondary — Government Green */
   --gem-green:      #1A7A4A;
   --gem-green-light:#2E9E60;
 
   /* Backgrounds */
-  --bg-page:        #F4F6F9;
+  --bg-page:        #FAFAFA;
   --bg-white:       #FFFFFF;
-  --bg-header:      #003366;
+  --bg-header:      #FFFFFF;
   --bg-sidebar:     #FFFFFF;
   --bg-card:        #FFFFFF;
-  --bg-row-alt:     #F8FAFC;
-  --bg-badge:       #EFF6FF;
+  --bg-row-alt:     #F9F9FA;
+  --bg-badge:       #F3F2F7;
+  
+  /* Gradients */
+  --bg-gradient-hero: linear-gradient(135deg, #FDF7F4 0%, #F4F1F9 100%);
 
   /* Text */
-  --text-heading:   #1A2B42;
-  --text-body:      #374151;
-  --text-secondary: #6B7280;
-  --text-muted:     #9CA3AF;
+  --text-heading:   #1E1C2B;
+  --text-body:      #4A465B;
+  --text-secondary: #747087;
+  --text-muted:     #A3A0B2;
   --text-on-navy:   #FFFFFF;
-  --text-link:      #003366;
+  --text-link:      #2A2359;
 
   /* Borders */
-  --border-light:   #E5E7EB;
-  --border-medium:  #D1D5DB;
-  --border-navy:    #003366;
+  --border-light:   #EAE9EE;
+  --border-medium:  #D5D3DE;
+  --border-navy:    #2A2359;
 
   /* Status */
-  --status-green:        #15803D;
+  --status-green:        #107C41;
   --status-green-bg:     #F0FDF4;
   --status-green-border: #BBF7D0;
 
-  --status-red:          #DC2626;
+  --status-red:          #D92929;
   --status-red-bg:       #FEF2F2;
   --status-red-border:   #FECACA;
 
-  --status-amber:        #B45309;
+  --status-amber:        #C76300;
   --status-amber-bg:     #FFFBEB;
   --status-amber-border: #FDE68A;
 
@@ -54,15 +57,17 @@
   --status-grey-bg:      #F9FAFB;
   --status-grey-border:  #E5E7EB;
 
-  /* Shadows */
-  --shadow-sm:   0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-  --shadow-card: 0 2px 8px rgba(0,51,102,0.08), 0 1px 3px rgba(0,0,0,0.05);
-  --shadow-nav:  0 2px 8px rgba(0,0,0,0.15);
+  /* Soft Shadows (myAadhaar aesthetic) */
+  --shadow-sm:   0 2px 8px rgba(42, 35, 89, 0.04), 0 1px 2px rgba(42, 35, 89, 0.02);
+  --shadow-card: 0 8px 24px rgba(42, 35, 89, 0.06), 0 2px 8px rgba(42, 35, 89, 0.04);
+  --shadow-hover: 0 12px 32px rgba(42, 35, 89, 0.08), 0 4px 12px rgba(42, 35, 89, 0.04);
+  --shadow-nav:  0 4px 12px rgba(0, 0, 0, 0.05);
 
   /* Radius */
-  --radius-sm: 4px;
-  --radius-md: 6px;
-  --radius-lg: 8px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -221,17 +226,18 @@ a:hover { text-decoration: underline; color: var(--gem-orange); }
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: var(--radius-md);
-  font-size: 13px;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: var(--radius-full);
+  font-size: 14px;
   font-weight: 600;
   cursor: pointer;
   border: none;
   text-decoration: none;
-  transition: background 0.15s, opacity 0.15s, transform 0.1s;
+  transition: all 0.2s ease;
   font-family: inherit;
   white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 
 .btn:active { transform: translateY(1px); }
@@ -240,30 +246,32 @@ a:hover { text-decoration: underline; color: var(--gem-orange); }
   background: var(--gem-navy);
   color: #fff;
 }
-.btn-primary:hover { background: var(--gem-navy-light); color: #fff; text-decoration: none; }
+.btn-primary:hover { background: var(--gem-navy-light); color: #fff; text-decoration: none; box-shadow: 0 4px 8px rgba(42, 35, 89, 0.2); }
 
 .btn-orange {
   background: var(--gem-orange);
   color: #fff;
 }
-.btn-orange:hover { background: var(--gem-orange-light); color: #fff; text-decoration: none; }
+.btn-orange:hover { background: var(--gem-orange-light); color: #fff; text-decoration: none; box-shadow: 0 4px 8px rgba(232, 105, 26, 0.2); }
 
 .btn-outline {
   background: transparent;
   color: var(--gem-navy);
   border: 1px solid var(--gem-navy);
+  box-shadow: none;
 }
-.btn-outline:hover { background: #EFF6FF; text-decoration: none; }
+.btn-outline:hover { background: var(--bg-badge); text-decoration: none; }
 
 .btn-ghost {
   background: transparent;
   color: var(--text-secondary);
   border: 1px solid var(--border-medium);
+  box-shadow: none;
 }
 .btn-ghost:hover { background: var(--bg-row-alt); color: var(--text-body); text-decoration: none; }
 
-.btn-sm { padding: 5px 12px; font-size: 12px; }
-.btn-xs { padding: 3px 10px; font-size: 11px; border-radius: var(--radius-sm); }
+.btn-sm { padding: 6px 14px; font-size: 13px; }
+.btn-xs { padding: 4px 12px; font-size: 12px; border-radius: var(--radius-full); }
 
 /* ─── Status Badges ──────────────────────────────────────────────────────── */
 .badge {

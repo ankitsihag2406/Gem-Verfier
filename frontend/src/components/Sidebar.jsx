@@ -6,9 +6,9 @@ import {
 import { MOCK_TENDERS, MOCK_BIDS } from "@/lib/mockData";
 
 const WORKSPACE_NAV = [
-  { href: "/",         label: "Dashboard",  icon: LayoutDashboard, getBadge: null },
-  { href: "/tenders",  label: "Tenders",    icon: FileText,        getBadge: () => MOCK_TENDERS.length },
-  { href: "/activity", label: "Audit Log",  icon: Activity,        getBadge: () => MOCK_BIDS.length * 3 },
+  { href: "/", label: "Dashboard", icon: LayoutDashboard, getBadge: null },
+  { href: "/tenders", label: "Tenders", icon: FileText, getBadge: () => MOCK_TENDERS.length },
+  { href: "/activity", label: "Audit Log", icon: Activity, getBadge: () => MOCK_BIDS.length * 3 },
 ];
 
 const ADMIN_NAV = [
@@ -20,29 +20,30 @@ function NavLink({ href, label, icon: Icon, count, active }) {
     <Link
       to={href}
       style={{
-        display: "flex", alignItems: "center", gap: 9,
-        padding: "8px 14px",
-        fontSize: 13, fontWeight: active ? 700 : 500,
+        display: "flex", alignItems: "center", gap: 10,
+        padding: "10px 16px",
+        margin: "2px 10px",
+        borderRadius: "8px",
+        fontSize: 13.5, fontWeight: active ? 600 : 500,
         color: active ? "var(--gem-navy)" : "var(--text-body)",
         textDecoration: "none",
-        borderLeft: `3px solid ${active ? "var(--gem-navy)" : "transparent"}`,
-        background: active ? "#EFF6FF" : "transparent",
-        transition: "background 0.1s",
+        background: active ? "var(--bg-badge)" : "transparent",
+        transition: "all 0.15s ease",
       }}
     >
-      <Icon size={15} color={active ? "var(--gem-navy)" : "var(--text-secondary)"} style={{ flexShrink: 0 }} />
+      <Icon size={16} color={active ? "var(--gem-navy)" : "var(--text-secondary)"} style={{ flexShrink: 0 }} />
       <span style={{ flex: 1 }}>{label}</span>
       {count !== undefined && (
         <span style={{
-          fontSize: 10.5, fontWeight: 700, padding: "1px 6px",
-          background: active ? "var(--gem-navy)" : "#E5E7EB",
+          fontSize: 11, fontWeight: 700, padding: "2px 8px",
+          background: active ? "var(--gem-navy)" : "var(--border-light)",
           color: active ? "#fff" : "var(--text-secondary)",
-          borderRadius: 10, lineHeight: 1.6,
+          borderRadius: 12, lineHeight: 1.6,
         }}>
           {count}
         </span>
       )}
-      {active && count === undefined && <ChevronRight size={12} color="var(--gem-navy)" style={{ opacity: 0.4 }} />}
+      {active && count === undefined && <ChevronRight size={14} color="var(--gem-navy)" style={{ opacity: 0.5 }} />}
     </Link>
   );
 }
@@ -84,28 +85,7 @@ export default function Sidebar() {
           );
         })}
 
-        <Link
-          to="/tenders"
-          style={{
-            display: "flex", alignItems: "center", gap: 9,
-            padding: "8px 14px", fontSize: 13, fontWeight: 500,
-            color: "var(--text-body)", textDecoration: "none",
-            borderLeft: "3px solid transparent",
-          }}
-        >
-          <Clock size={15} color="var(--text-secondary)" style={{ flexShrink: 0 }} />
-          <span style={{ flex: 1 }}>Review Queue</span>
-          {reviewCount > 0 && (
-            <span style={{
-              fontSize: 10.5, fontWeight: 700, padding: "1px 6px",
-              background: "#FFFBEB", color: "#B45309",
-              border: "1px solid #FDE68A",
-              borderRadius: 10, lineHeight: 1.6,
-            }}>
-              {reviewCount}
-            </span>
-          )}
-        </Link>
+
 
         <SectionLabel>Administration</SectionLabel>
         {ADMIN_NAV.map(({ href, label, icon }) => {
