@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import AppShell from "@/components/AppShell";
 import { Link } from "react-router-dom";
 import { MOCK_BIDS, formatDate } from "@/lib/mockData";
+import { useNotifications } from "@/lib/NotificationContext";
 import { Activity, Brain, Upload, FileText, CheckCircle2, AlertTriangle, Clock } from "lucide-react";
 
 function buildTimeline(bid) {
@@ -30,6 +32,9 @@ function buildTimeline(bid) {
 }
 
 export default function ActivityPage() {
+  const { markActivityViewed } = useNotifications();
+  useEffect(() => { markActivityViewed(); }, [markActivityViewed]);
+
   return (
     <AppShell>
       <div className="page-bar">

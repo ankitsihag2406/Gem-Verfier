@@ -3,13 +3,8 @@ import {
   LayoutDashboard, FileText, Activity, Settings,
   ChevronRight, Clock,
 } from "lucide-react";
-import { MOCK_TENDERS, MOCK_BIDS } from "@/lib/mockData";
-
-const WORKSPACE_NAV = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard, getBadge: null },
-  { href: "/tenders", label: "Tenders", icon: FileText, getBadge: () => MOCK_TENDERS.length },
-  { href: "/activity", label: "Audit Log", icon: Activity, getBadge: () => MOCK_BIDS.length * 3 },
-];
+import { MOCK_BIDS } from "@/lib/mockData";
+import { useNotifications } from "@/lib/NotificationContext";
 
 const ADMIN_NAV = [
   { href: "/settings", label: "Settings", icon: Settings },
@@ -62,7 +57,14 @@ function SectionLabel({ children }) {
 
 export default function Sidebar() {
   const { pathname } = useLocation();
+  const { unviewedTenderCount, unviewedAuditCount } = useNotifications();
   const reviewCount = MOCK_BIDS.filter(b => b.overallCompliance === "PARTIAL").length;
+
+  const workspaceNav = [
+    { href: "/", label: "Dashboard", icon: LayoutDashboard, count: undefined },
+    { href: "/tenders", label: "Tenders", icon: FileText, count: unviewedTenderCount || undefined },
+    { href: "/activity", label: "Audit Log", icon: Activity, count: unviewedAuditCount || undefined },
+  ];
 
   return (
     <aside style={{
@@ -74,12 +76,12 @@ export default function Sidebar() {
     }}>
       <nav style={{ paddingTop: 8, flex: 1 }}>
         <SectionLabel>Workspace</SectionLabel>
-        {WORKSPACE_NAV.map(({ href, label, icon, getBadge }) => {
+        {workspaceNav.map(({ href, label, icon, count }) => {
           const active = href === "/" ? pathname === "/" : pathname.startsWith(href);
           return (
             <NavLink
               key={href} href={href} label={label} icon={icon}
-              count={getBadge ? getBadge() : undefined}
+              count={count}
               active={active}
             />
           );

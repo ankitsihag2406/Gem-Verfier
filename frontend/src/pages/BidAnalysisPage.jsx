@@ -1,13 +1,143 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link, Navigate } from "react-router-dom";
 import AppShell from "@/components/AppShell";
 import ParameterTable from "@/components/ParameterTable";
 import EvidencePanel from "@/components/EvidencePanel";
 import { getBidById, getTenderById, getComplianceSummary, formatProcessingTime } from "@/lib/mockData";
+import { useNotifications } from "@/lib/NotificationContext";
 import {
   ArrowLeft, Download, Brain, FileText, Building2,
-  CheckCircle2, XCircle, AlertTriangle, Hash, Eye, EyeOff,
+  CheckCircle2, XCircle, AlertTriangle, Hash, Eye, EyeOff, Shield, X,
 } from "lucide-react";
+
+/* ── Override Decision Modal ───────────────────────────────────────────── */
+function OverrideModal({ bid, onConfirm, onClose }) {
+  const [decision, setDecision] = useState("COMPLIANT");
+  const [reason, setReason] = useState("");
+  const [officer, setOfficer] = useState("");
+
+  const decisions = [
+    { value: "COMPLIANT", label: "Compliant", color: "#15803D", bg: "#F0FDF4", border: "#BBF7D0", Icon: CheckCircle2 },
+    { value: "NON_COMPLIANT", label: "Non-Compliant", color: "#DC2626", bg: "#FEF2F2", border: "#FECACA", Icon: XCircle },
+  ];
+
+  return (
+    <div style={{
+      position: "fixed", inset: 0, zIndex: 1000,
+      background: "rgba(0,0,0,0.45)", backdropFilter: "blur(4px)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+    }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} style={{
+        background: "#fff", borderRadius: 14, width: 480,
+        boxShadow: "0 20px 60px rgba(0,0,0,0.2)",
+        overflow: "hidden", animation: "fadeIn 0.2s ease",
+      }}>
+        {/* Header */}
+        <div style={{
+          padding: "18px 24px", borderBottom: "1px solid var(--border-light)",
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <div style={{
+              width: 34, height: 34, borderRadius: 8,
+              background: "#FFFBEB", border: "1px solid #FDE68A",
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Shield size={16} color="#B45309" />
+            </div>
+            <div>
+              <div style={{ fontSize: 15, fontWeight: 700, color: "var(--text-heading)" }}>Override AI Decision</div>
+              <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 1 }}>{bid.companyName}</div>
+            </div>
+          </div>
+          <button onClick={onClose} style={{
+            background: "none", border: "1px solid var(--border-light)",
+            cursor: "pointer", padding: 5, borderRadius: 6, display: "flex",
+            color: "var(--text-secondary)",
+          }}>
+            <X size={15} />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div style={{ padding: "22px 24px", display: "flex", flexDirection: "column", gap: 18 }}>
+          <div className="alert alert-warn" style={{ margin: 0 }}>
+            <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+            <div style={{ fontSize: 12.5, lineHeight: 1.6 }}>
+              This will permanently override the AI&apos;s compliance verdict. This action will be recorded in the audit log.
+            </div>
+          </div>
+
+          {/* Decision select */}
+          <div>
+            <label className="field-label">New Compliance Decision</label>
+            <div style={{ display: "flex", gap: 10 }}>
+              {decisions.map(d => (
+                <button key={d.value} onClick={() => setDecision(d.value)} style={{
+                  flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  padding: "12px 16px", borderRadius: 8, cursor: "pointer",
+                  fontFamily: "inherit", fontSize: 13.5, fontWeight: 700,
+                  color: decision === d.value ? d.color : "var(--text-secondary)",
+                  background: decision === d.value ? d.bg : "#F9FAFB",
+                  border: `2px solid ${decision === d.value ? d.color : "var(--border-light)"}`,
+                  transition: "all 0.15s",
+                }}>
+                  <d.Icon size={16} />
+                  {d.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Officer name */}
+          <div>
+            <label className="field-label">Reviewing Officer Name</label>
+            <input
+              className="input-field"
+              placeholder="e.g. Dr. Rajesh Sharma, IAS"
+              value={officer}
+              onChange={e => setOfficer(e.target.value)}
+            />
+          </div>
+
+          {/* Reason */}
+          <div>
+            <label className="field-label">Justification / Reason</label>
+            <textarea
+              className="input-field"
+              rows={3}
+              placeholder="Provide the rationale for overriding the AI decision…"
+              value={reason}
+              onChange={e => setReason(e.target.value)}
+              style={{ resize: "vertical" }}
+            />
+            <div className="field-hint">This will be included in the compliance audit report.</div>
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div style={{
+          padding: "16px 24px", borderTop: "1px solid var(--border-light)",
+          display: "flex", justifyContent: "flex-end", gap: 10,
+          background: "#F9FAFB",
+        }}>
+          <button onClick={onClose} className="btn btn-ghost btn-sm">Cancel</button>
+          <button
+            onClick={() => onConfirm({ decision, reason, officer })}
+            disabled={!reason.trim() || !officer.trim()}
+            className="btn btn-primary btn-sm"
+            style={{
+              opacity: (!reason.trim() || !officer.trim()) ? 0.5 : 1,
+              pointerEvents: (!reason.trim() || !officer.trim()) ? "none" : "auto",
+            }}
+          >
+            <Shield size={13} /> Confirm Override
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Fake PDF Viewer (unchanged logic, just used inside a card now) ─────── */
 function FakePdfViewer({ bid, highlightQuote }) {
@@ -86,14 +216,33 @@ export default function BidAnalysisPage() {
   if (!bid) return <Navigate to="/" replace />;
 
   const tender = getTenderById(bid.tenderId);
+  const { markBidViewed } = useNotifications();
   const [selectedParam, setSelectedParam] = useState(null);
   const [showPdf, setShowPdf] = useState(false);
+  const [showOverrideModal, setShowOverrideModal] = useState(false);
+  const [override, setOverride] = useState(null); // { decision, reason, officer, timestamp }
   const summary = getComplianceSummary(bid.parameters);
 
-  const overallColor = bid.overallCompliance === "COMPLIANT" ? "#15803D"
-    : bid.overallCompliance === "NON_COMPLIANT" ? "#DC2626" : "#B45309";
-  const OverallIcon = bid.overallCompliance === "COMPLIANT" ? CheckCircle2
-    : bid.overallCompliance === "NON_COMPLIANT" ? XCircle : AlertTriangle;
+  // Mark this bid as viewed so sidebar badge decrements
+  useEffect(() => { markBidViewed(id); }, [id, markBidViewed]);
+
+  const effectiveCompliance = override ? override.decision : bid.overallCompliance;
+  const overallColor = effectiveCompliance === "COMPLIANT" ? "#15803D"
+    : effectiveCompliance === "NON_COMPLIANT" ? "#DC2626" : "#B45309";
+  const OverallIcon = effectiveCompliance === "COMPLIANT" ? CheckCircle2
+    : effectiveCompliance === "NON_COMPLIANT" ? XCircle : AlertTriangle;
+
+  const handleOverrideConfirm = ({ decision, reason, officer }) => {
+    bid.overallCompliance = decision; // mutate in-memory mock
+    setOverride({
+      decision,
+      reason,
+      officer,
+      timestamp: new Date().toLocaleString("en-IN", { dateStyle: "medium", timeStyle: "short" }),
+      previousDecision: "PARTIAL",
+    });
+    setShowOverrideModal(false);
+  };
 
   const handleSelectParam = (param) => {
     setSelectedParam(param);
@@ -119,15 +268,28 @@ export default function BidAnalysisPage() {
           <span style={{ fontSize: 14, fontWeight: 700, color: "var(--text-heading)" }}>{bid.companyName}</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          {bid.overallCompliance === "PARTIAL" && (
-            <button style={{
-              display: "flex", alignItems: "center", gap: 5,
-              padding: "5px 12px", fontSize: 12, fontWeight: 700,
-              background: "#B45309", color: "#fff", border: "none",
-              borderRadius: 5, cursor: "pointer",
-            }}>
+          {!override && bid.overallCompliance === "PARTIAL" && (
+            <button
+              onClick={() => setShowOverrideModal(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 5,
+                padding: "5px 12px", fontSize: 12, fontWeight: 700,
+                background: "#B45309", color: "#fff", border: "none",
+                borderRadius: 5, cursor: "pointer",
+              }}
+            >
               ✎ Override AI Decision
             </button>
+          )}
+          {override && (
+            <div style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "4px 12px", fontSize: 11.5, fontWeight: 700,
+              background: "#EFF6FF", color: "var(--gem-navy)",
+              border: "1px solid #BFDBFE", borderRadius: 5,
+            }}>
+              <Shield size={12} /> Manually Overridden
+            </div>
           )}
           <button className="btn btn-ghost btn-sm"><Download size={13} /> Audit Report</button>
         </div>
@@ -157,7 +319,9 @@ export default function BidAnalysisPage() {
 
           {/* Overall verdict */}
           <div className="card" style={{ padding: "20px 22px" }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>AI Verdict</div>
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 10 }}>
+              {override ? "Manual Verdict" : "AI Verdict"}
+            </div>
             <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
               <div style={{
                 width: 40, height: 40, borderRadius: 10,
@@ -168,9 +332,13 @@ export default function BidAnalysisPage() {
               </div>
               <div>
                 <div style={{ fontSize: 18, fontWeight: 800, color: overallColor, lineHeight: 1.2 }}>
-                  {bid.overallCompliance.replace("_", " ")}
+                  {effectiveCompliance.replace("_", " ")}
                 </div>
-                {bid.avgConfidence !== null && (
+                {override ? (
+                  <div style={{ fontSize: 11.5, color: "var(--text-secondary)", marginTop: 2 }}>
+                    Overridden by {override.officer}
+                  </div>
+                ) : bid.avgConfidence !== null && (
                   <div style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 2 }}>
                     Avg confidence: {Math.round(bid.avgConfidence * 100)}%
                   </div>
@@ -304,7 +472,45 @@ export default function BidAnalysisPage() {
           )}
         </div>
 
+        {/* Override audit banner */}
+        {override && (
+          <div className="card" style={{ padding: "18px 22px", borderLeft: "4px solid var(--gem-navy)" }}>
+            <div style={{ display: "flex", alignItems: "flex-start", gap: 14 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 8,
+                background: "#EFF6FF", border: "1px solid #BFDBFE",
+                display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+              }}>
+                <Shield size={16} color="var(--gem-navy)" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: "var(--text-heading)", marginBottom: 4 }}>
+                  AI Decision Overridden
+                </div>
+                <div style={{ fontSize: 12.5, color: "var(--text-body)", lineHeight: 1.6, marginBottom: 6 }}>
+                  {override.reason}
+                </div>
+                <div style={{ display: "flex", gap: 16, fontSize: 11.5, color: "var(--text-secondary)" }}>
+                  <span><strong>Officer:</strong> {override.officer}</span>
+                  <span><strong>Date:</strong> {override.timestamp}</span>
+                  <span><strong>Previous:</strong> {override.previousDecision.replace("_", " ")}</span>
+                  <span><strong>New:</strong> <span style={{ color: overallColor, fontWeight: 700 }}>{override.decision.replace("_", " ")}</span></span>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
       </div>
+
+      {/* Override Modal */}
+      {showOverrideModal && (
+        <OverrideModal
+          bid={bid}
+          onConfirm={handleOverrideConfirm}
+          onClose={() => setShowOverrideModal(false)}
+        />
+      )}
     </AppShell>
   );
 }
